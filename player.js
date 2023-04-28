@@ -30,6 +30,7 @@ class Player
         this.debugColor=color(0, 0, 255)
         this.state = "idle";//animation state
         this.direction = true; //true = right, false = left
+        this.change = 0;//timer to control whether or not to change player state; <0: good
     }
 
     update()
@@ -101,6 +102,7 @@ class Player
         this.vel.x/=(this.friction);
         }else
         {
+            //this.state = "jump";
             this.vel.x/=(this.airFriction)
         }
 
@@ -118,20 +120,49 @@ class Player
 
 
         //update direction/state
-        if (this.pos.x-this.lastPos.x<-1)
-        {
-            this.direction = false;
-        }else if (this.pos.x-this.lastPos.x>1)
-        {
-            this.direction = true;
-        }
-        if (abs(this.pos.x-this.lastPos.x)<3)
-        {
-            this.state = "idle"
+        if (this.change < 0){
+            
+
+
+            if (this.pos.x-this.lastPos.x<-1)
+            {
+                if (this.direction==true)
+                {
+                    frameCount = 0;
+                    this.state = "turn"
+                    this.change = 10;
+                    this.direction = false;
+                    return;
+                }
+                this.direction = false;
+                
+                
+            }else if (this.pos.x-this.lastPos.x>1)
+            {
+                if (this.direction!=true)
+                {
+
+                    frameCount = 0;
+                    this.state = "turn"
+                    this.change = 10;
+                    this.direction = true;
+                    return;
+                }
+                this.direction = true;
+                
+            }
+            if (abs(this.pos.x-this.lastPos.x)<3 && this.change < 0)
+            {
+                this.state = "idle"
+            }else
+            {
+                this.state = "run"
+            }
         }else
         {
-            this.state = "run"
+
         }
+        //c.print(this.change)
         //c.print(this.pos.x-this.lastPos.x)
         //c.print(this.direction)
 
@@ -139,24 +170,22 @@ class Player
     
     draw()
     {
+        c.print(this.state);
         push();
         //fill('crimson');
         stroke(this.debugColor);
         noFill();
         strokeWeight(5)
         rect(this.pos.x,this.pos.y,this.size.x,this.size.y);
-
+        var scaler = 60;
+        var x = this.pos.x-scaler+19;
+        var y = this.pos.y-scaler;
+        var w = this.size.x * (1+1/3)+(scaler*2) ;//60
+        var h = this.size.y * (8/9)+(scaler*2)   ;//90
         if (this.state == "idle")
         {
             //frameCount+=random([0,0,0,-1]);
             var part = floor(map(frameCount%60,0,60-1,0,17));
-            
-            const scaler = 60;
-            var x = this.pos.x-scaler+19;
-            var y = this.pos.y-scaler;
-            var w = this.size.x * (1+1/3)+(scaler*2) ;//60
-            var h = this.size.y * (8/9)+(scaler*2)   ;//90
-            
             
             
             if (this.direction){
@@ -165,20 +194,50 @@ class Player
             }else
             {
                 x = this.pos.x-scaler-37;
-                y = this.pos.y-scaler;
-                w = this.size.x * (1+1/3)+(scaler*2) ;//60
-                h = this.size.y * (8/9)+(scaler*2)   ;//90
+                
                 image(flippedAnimation.idle[part],x,y,w,h)
             }
-            rect(x,y,w,h)
-            textAlign(LEFT,TOP);
-            fill(255)
-            stroke(0)
-            strokeWeight(2)
-            text("Image Size",x,y-20)
+            
         }
-
+        if (this.state == "run")
+        {
+            //frameCount+=random([0,0,0,-1]);
+            var part = floor(map(frameCount%45,0,45-1,0,23));
+            if (this.direction){
+            
+	        image(animation.run[part],x,y,w,h);
+            }else
+            {
+                x = this.pos.x-scaler-37;
+                image(flippedAnimation.run[part],x,y,w,h)
+            }
+            
+        }
+        if (this.state == "turn")
+        {
+            scaler = 30
+            x = this.pos.x-scaler-37;
+            var part = floor(map(this.change,10,0,0,4));
+            //c.print(part)
+            if (this.direction){
+            
+	        image(animation.turn[part],x,y+5,w,h-5);
+            }else
+            {
+                x = this.pos.x-scaler-37;
+                image(flippedAnimation.turn[part],x,y+5,w,h-5)
+            }
+            
+        }
+        /*
+        rect(x,y,w,h)
+        textAlign(LEFT,TOP);
+        fill(255)
+        stroke(0)
+        strokeWeight(2)
+        text("Image Size",x,y-20)*/
         pop();
+        this.change--;
     }
 
 };

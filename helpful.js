@@ -156,21 +156,21 @@ function rectCollision(dynamic,static){
     if( corr.up < corr.down && corr.up < corr.left &&
         corr.up < corr.right){
             dynamic.pos.y-=corr.up;
-            dynamic.vel.y=0;
+            dynamic.vel.y=min(0,dynamic.vel.y);
             dynamic.canJump=true;
         }
     else if( corr.down < corr.up && corr.down < corr.left &&
         corr.down < corr.right){
             dynamic.pos.y+=corr.down;
-            dynamic.vel.y=0;
+            dynamic.vel.y=max(0,dynamic.vel.y);
         }
     else if( corr.left < corr.down && corr.left < corr.up &&
         corr.left < corr.right){
             dynamic.pos.x-=corr.left;
-            dynamic.vel.x=0;
+            dynamic.vel.x=min(0,dynamic.vel.x);
         }
     else{
             dynamic.pos.x+=corr.right;
-            dynamic.vel.x=0;
+            dynamic.vel.x=max(0,dynamic.vel.x);
         }
 }
