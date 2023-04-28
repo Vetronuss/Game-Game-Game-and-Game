@@ -31,6 +31,7 @@ class Player
         this.state = "idle";//animation state
         this.direction = true; //true = right, false = left
         this.change = 0;//timer to control whether or not to change player state; <0: good
+        this.jump = false;
     }
 
     update()
@@ -58,6 +59,7 @@ class Player
             this.canJump = false;
             spaceRelease = false;
             this.vel.y=-this.jumpHeight;
+            
         }
 
         if (keyIsDown(this.keyBinds.tp))
@@ -90,6 +92,7 @@ class Player
             {
                 if (this.canJump){
                     this.vel.x-=this.speed;
+                    
                 }else
                 {
                     this.vel.x-=this.speed/5;
@@ -117,7 +120,7 @@ class Player
 
             rectCollision(this,i);
         }
-
+        
 
         //update direction/state
         if (this.change < 0){
@@ -154,14 +157,42 @@ class Player
             if (abs(this.pos.x-this.lastPos.x)<3 && this.change < 0)
             {
                 this.state = "idle"
+                if (this.jump)
+                {
+                    this.jump = false;
+                    this.change = 8;
+                    this.state = "landing"
+                }
             }else
             {
+                
                 this.state = "run"
             }
         }else
         {
 
         }
+        if (!this.canJump)
+        {
+            this.state = "jump"
+            
+            if (this.state != "landing"){
+                this.jump = true;
+            }
+        }
+
+
+
+
+        if (this.vel.y > 1)
+        {
+            
+            this.canJump = false;
+            
+        }
+        
+
+        //if (this.canJump == false){}
         //c.print(this.change)
         //c.print(this.pos.x-this.lastPos.x)
         //c.print(this.direction)
@@ -170,13 +201,14 @@ class Player
     
     draw()
     {
-        c.print(this.state);
+        //c.print(this.state);
+        //c.print(this.change)
         push();
         //fill('crimson');
         stroke(this.debugColor);
         noFill();
         strokeWeight(5)
-        rect(this.pos.x,this.pos.y,this.size.x,this.size.y);
+        //rect(this.pos.x,this.pos.y,this.size.x,this.size.y);
         var scaler = 60;
         var x = this.pos.x-scaler+19;
         var y = this.pos.y-scaler;
@@ -228,6 +260,45 @@ class Player
                 image(flippedAnimation.turn[part],x,y+5,w,h-5)
             }
             
+        }
+        if (this.state == "jump")
+        {
+            //negative should be up
+            //pos should be fall
+
+            var part = floor(map(this.vel.y,-this.jumpHeight,this.jumpHeight*2,0,18))
+            if (part >= 14)
+            {
+                part = 14;
+                part-=random([0,0,0,1,2])
+            }
+            part = constrain(part,0,14);
+            //c.print(part);
+            if (this.direction){
+            
+	        image(animation.jump[part],x,y,w,h);
+            }else
+            {
+                x = this.pos.x-scaler-37;
+                image(flippedAnimation.jump[part],x,y,w,h)
+            }
+        }
+        if (this.state == "landing")
+        {
+            //negative should be up
+            //pos should be fall
+
+            var part = floor(map(this.change,8,0,15,18))
+            part = constrain(part,14,18);
+            //c.print(part);
+            if (this.direction){
+            
+	        image(animation.jump[part],x,y,w,h);
+            }else
+            {
+                x = this.pos.x-scaler-37;
+                image(flippedAnimation.jump[part],x,y,w,h)
+            }
         }
         /*
         rect(x,y,w,h)

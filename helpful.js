@@ -147,6 +147,7 @@ function rectCollision(dynamic,static){
 
     if(corr.up < 0 || corr.down < 0 ||
         corr.left < 0 || corr.right < 0){
+           
             return new BlockCollisionResult();
         }
 
